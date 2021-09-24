@@ -8,8 +8,10 @@ from django.template.loader import render_to_string
 from django_rest_passwordreset.signals import reset_password_token_created
 from decouple import config
 from django.contrib.auth.models import User
+from .serializers import UserSerializer
 import random
 import string
+
 
 class UserList(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -40,6 +42,12 @@ class UserList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CurrentUser(APIView):
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
 
 
 @receiver(reset_password_token_created)
