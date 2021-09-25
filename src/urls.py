@@ -15,8 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from decouple import config
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(config('ADMIN_URL'), admin.site.urls),
     path('custom-auth/', include('custom_auth.urls')),
+    path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
+
 ]
