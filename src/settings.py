@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+    'admin_honeypot',
+
     'rest_framework',
     'rest_framework.authtoken',
 
