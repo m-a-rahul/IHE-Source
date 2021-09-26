@@ -17,20 +17,13 @@ class UserList(APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
-        # User Id generation
         uid_list = []
         for user in User.objects.all():
             uid_list.append(user.username[3:])
-        uid_index1 = ''.join(random.choice(string.digits) for i in range(2))
-        uid_index2 = ''.join(random.choice(string.ascii_uppercase) for i in range(2))
-        uid_index3 = ''.join(random.choice(string.digits) for i in range(3))
-        uid = uid_index1 + uid_index2 + uid_index3
 
+        uid = ''.join(random.choice(string.digits) for i in range(2)) + ''.join(random.choice(string.ascii_uppercase) for i in range(2)) + ''.join(random.choice(string.digits) for i in range(3))
         while uid in uid_list:
-            uid_index1 = ''.join(random.choice(string.digits) for i in range(2))
-            uid_index2 = ''.join(random.choice(string.ascii_uppercase) for i in range(2))
-            uid_index3 = ''.join(random.choice(string.digits) for i in range(3))
-            uid = uid_index1 + uid_index2 + uid_index3
+            uid = ''.join(random.choice(string.digits) for i in range(2)) + ''.join(random.choice(string.ascii_uppercase) for i in range(2)) + ''.join(random.choice(string.digits) for i in range(3))
 
         _mutable = request.data._mutable
         request.data._mutable = True
