@@ -16,7 +16,8 @@ import string
 class UserList(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request):
+    @staticmethod
+    def post(request):
         uid_list = []
         for user in User.objects.all():
             uid_list.append(user.username[3:])
@@ -38,7 +39,8 @@ class UserList(APIView):
 
 
 class CurrentUser(APIView):
-    def get(self, request):
+    @staticmethod
+    def get(request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 

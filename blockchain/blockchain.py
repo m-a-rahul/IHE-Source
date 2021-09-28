@@ -1,6 +1,8 @@
 import datetime
 import hashlib
 import json
+import requests
+from requests.exceptions import ConnectionError
 
 
 class Block:
@@ -22,6 +24,7 @@ class Blockchain:
 
     def __init__(self):
         self.chain = []
+        self.nodes = {"127.0.0.1:8000", "127.0.0.1:8001"}
         self.create_block(nonce=1, previous_hash='0')
 
     def create_block(self, nonce, previous_hash):
@@ -40,7 +43,8 @@ class Blockchain:
         """
         return self.chain[-1]
 
-    def get_nonce(self, previous_nonce):
+    @staticmethod
+    def get_nonce(previous_nonce):
         """
         :param previous_nonce: <int> The proof of the tail block
         :return: <int> New Nonce generated from the Proof of Work algorithm
@@ -55,7 +59,8 @@ class Blockchain:
                 nonce += 1
         return nonce
 
-    def get_hash(self, block):
+    @staticmethod
+    def get_hash(block):
         """
         :param block: <str> The instance of the tail block
         :return: <str> Encoding using UTF-8 and SHA-256
@@ -82,3 +87,25 @@ class Blockchain:
             head = block
             index += 1
         return True
+
+    def consensus(self):
+        """
+        :return: <bool> Consensus Algorithm to maintain a common agreement and return true if chain replaced
+        """
+        longest = None
+        maxlength = len(self.chain)
+        for node in self.nodes:
+            try:
+                response = requests.get(f'http://{node}/blockchain/get/')
+                if response.status_code == 200:
+                    length = response.json()['length']
+                    chain = response.json()['chain']
+                    if length > maxlength:
+                        maxlength = length
+                        longest = [json.dumps(i) for i in chain]
+            except ConnectionError:
+                continue
+        if longest:
+            self.chain = longest
+            return True
+        return False
