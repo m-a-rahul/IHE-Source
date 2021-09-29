@@ -9,12 +9,14 @@ class Block:
     """
     :param nonce: <int> The proof given by the Proof of Work algorithm
     :param previous_hash: <str> Hash of previous Block
+    :param data: <dict> Data to be stored across the block
     :return: <json> Block instance
     """
-    def __init__(self, nonce, previous_hash):
+    def __init__(self, nonce, previous_hash, data):
         self.timestamp = str(datetime.datetime.now())
         self.nonce = nonce
         self.previous_hash = previous_hash
+        self.data = data
 
     def jsonify(self):
         return json.dumps(self.__dict__)
@@ -25,15 +27,17 @@ class Blockchain:
     def __init__(self):
         self.chain = []
         self.nodes = {"127.0.0.1:8000", "127.0.0.1:8001"}
-        self.create_block(nonce=1, previous_hash='0')
+        self.data = {}
+        self.create_block(nonce=1, previous_hash='0', data={})
 
-    def create_block(self, nonce, previous_hash):
+    def create_block(self, nonce, previous_hash, data):
         """
         :param nonce: <int> The proof given by the Proof of Work algorithm
         :param previous_hash: <str> Hash of previous Block
+        :param data: <dict> Data to be stored across the block
         :return: <obj> New Block
         """
-        block = Block(nonce, previous_hash)
+        block = Block(nonce, previous_hash, data)
         self.chain.append(block.jsonify())
         return block
 

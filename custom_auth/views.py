@@ -9,6 +9,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from decouple import config
 from django.contrib.auth.models import User
 from .serializers import UserSerializer
+from django.views.decorators.csrf import csrf_exempt
 import random
 import string
 
@@ -17,6 +18,7 @@ class UserList(APIView):
     permission_classes = (permissions.AllowAny,)
 
     @staticmethod
+    @csrf_exempt
     def post(request):
         uid_list = []
         for user in User.objects.all():
