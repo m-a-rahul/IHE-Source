@@ -9,6 +9,7 @@ from django_rest_passwordreset.signals import reset_password_token_created
 from decouple import config
 from django.contrib.auth.models import User
 from .serializers import UserSerializer
+from django.views.decorators.csrf import csrf_exempt
 import random
 import string
 
@@ -16,7 +17,9 @@ import string
 class UserList(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def post(self, request):
+    @staticmethod
+    @csrf_exempt
+    def post(request):
         uid_list = []
         for user in User.objects.all():
             uid_list.append(user.username[3:])
@@ -25,10 +28,10 @@ class UserList(APIView):
         while uid in uid_list:
             uid = ''.join(random.choice(string.digits) for i in range(2)) + ''.join(random.choice(string.ascii_uppercase) for i in range(2)) + ''.join(random.choice(string.digits) for i in range(3))
 
-        _mutable = request.data._mutable
-        request.data._mutable = True
+        # _mutable = request.data._mutable
+        # request.data._mutable = True
         request.data['username'] += uid
-        request.data._mutable = _mutable
+        # request.data._mutable = _mutable
 
         serializer = UserSerializerWithToken(data=request.data)
         if serializer.is_valid():
@@ -38,7 +41,8 @@ class UserList(APIView):
 
 
 class CurrentUser(APIView):
-    def get(self, request):
+    @staticmethod
+    def get(request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
@@ -50,6 +54,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
+        'last_name': reset_password_token.user.last_name,
         'reset_password_url': config('FRONTEND_URL')+"/reset_password/?auth_token={}".format(reset_password_token.key)
     }
 
