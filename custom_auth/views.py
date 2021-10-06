@@ -28,10 +28,10 @@ class UserList(APIView):
         while uid in uid_list:
             uid = ''.join(random.choice(string.digits) for i in range(2)) + ''.join(random.choice(string.ascii_uppercase) for i in range(2)) + ''.join(random.choice(string.digits) for i in range(3))
 
-        _mutable = request.data._mutable
-        request.data._mutable = True
+        # _mutable = request.data._mutable
+        # request.data._mutable = True
         request.data['username'] += uid
-        request.data._mutable = _mutable
+        # request.data._mutable = _mutable
 
         serializer = UserSerializerWithToken(data=request.data)
         if serializer.is_valid():
@@ -54,6 +54,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'current_user': reset_password_token.user,
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
+        'last_name': reset_password_token.user.last_name,
         'reset_password_url': config('FRONTEND_URL')+"/reset_password/?auth_token={}".format(reset_password_token.key)
     }
 
