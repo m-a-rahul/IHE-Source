@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'django_rest_passwordreset',
 
     'custom_auth',
+    'user_details',
 ]
 
 MIDDLEWARE = [
