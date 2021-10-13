@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Patient(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     dob = models.DateField
     gender = models.CharField(max_length=1)
     nationality = models.CharField(max_length=20)
@@ -22,14 +23,14 @@ class Patient(models.Model):
 
 
 class Hospital(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     doi = models.DateField
     imai = models.CharField(max_length=200)
     bed_count = models.IntegerField
     type = models.CharField(max_length=200)
     contact = models.CharField(max_length=200)
     landline1 = models.CharField(max_length=200)
-    landline2 = models.CharField(max_length=200,blank=True,null=True)
+    landline2 = models.CharField(max_length=200, blank=True, null=True)
     gstin = models.CharField(max_length=200)
     address = models.TextField
     pin_code = models.IntegerField
@@ -37,14 +38,14 @@ class Hospital(models.Model):
     state = models.CharField(max_length=200)
     mobile = models.CharField(max_length=13)
     email1 = models.EmailField
-    email2 = models.EmailField(blank=True,null=True)
+    email2 = models.EmailField(blank=True, null=True)
     doctor_count = models.IntegerField
-    web = models.URLField(blank=True,null=True)
+    web = models.URLField(blank=True, null=True)
 
 
 class Doctor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    hos_code = models.OneToOneField(Hospital,on_delete=models.CASCADE)
+    hos_code = models.ForeignKey(Hospital, on_delete=models.CASCADE)
     dob = models.DateField
     gender = models.CharField(max_length=1)
     nationality = models.CharField(max_length=200)
@@ -58,8 +59,8 @@ class Doctor(models.Model):
 
 
 class Staff(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
-    hos_code = models.OneToOneField(Hospital,on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    hos_code = models.ForeignKey(Hospital, on_delete=models.CASCADE)
     dob = models.DateField
     gender = models.CharField(max_length=1)
     nationality = models.CharField(max_length=200)
@@ -71,8 +72,8 @@ class Staff(models.Model):
 
 
 class Nurse(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
-    hos_code = models.OneToOneField(Hospital,on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    hos_code = models.ForeignKey(Hospital, on_delete=models.CASCADE)
     dob = models.DateField
     gender = models.CharField(max_length=1)
     nationality = models.CharField(max_length=200)
@@ -83,4 +84,3 @@ class Nurse(models.Model):
     aadharno = models.CharField(max_length=12)
     contact = models.CharField(max_length=13)
     email = models.EmailField
-
