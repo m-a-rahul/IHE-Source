@@ -18,7 +18,6 @@ class Patient(models.Model):
     city = models.CharField(max_length=200)
     state = models.CharField(max_length=200)
     mobile = models.CharField(max_length=13)
-    email = models.EmailField
     aadhar = models.CharField(max_length=12)
 
 
@@ -37,7 +36,6 @@ class Hospital(models.Model):
     city = models.CharField(max_length=200)
     state = models.CharField(max_length=200)
     mobile = models.CharField(max_length=13)
-    email1 = models.EmailField
     email2 = models.EmailField(blank=True, null=True)
     doctor_count = models.IntegerField
     web = models.URLField(blank=True, null=True)
@@ -55,7 +53,6 @@ class Doctor(models.Model):
     department = models.CharField(max_length=200)
     designation = models.CharField(max_length=200)
     contact = models.CharField(max_length=13)
-    email = models.EmailField
 
 
 class Staff(models.Model):
@@ -68,7 +65,6 @@ class Staff(models.Model):
     department = models.CharField(max_length=200)
     aadharno = models.CharField(max_length=12)
     contact = models.CharField(max_length=13)
-    email = models.EmailField
 
 
 class Nurse(models.Model):
@@ -83,4 +79,3 @@ class Nurse(models.Model):
     department = models.CharField(max_length=200)
     aadharno = models.CharField(max_length=12)
     contact = models.CharField(max_length=13)
-    email = models.EmailField
