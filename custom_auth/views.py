@@ -58,8 +58,8 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'reset_password_url': config('FRONTEND_URL')+"/reset_password/?auth_token={}".format(reset_password_token.key)
     }
 
-    email_html_message = render_to_string('email/user_reset_password.html', context)
-    email_plaintext_message = render_to_string('email/user_reset_password.txt', context)
+    email_html_message = render_to_string('passwordresetemail/user_reset_password.html', context)
+    email_plaintext_message = render_to_string('passwordresetemail/user_reset_password.txt', context)
 
     msg = EmailMultiAlternatives(
         # title:

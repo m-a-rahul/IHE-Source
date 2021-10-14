@@ -28,8 +28,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
-# Application definition
+ADMINS = [('Rahul', 'antorahul070@gmail.com'),
+          ('Pritish', 'princepritish26@gmail.com'),
+          ('Aditya', 'ms.adityaraj@gmail.com')]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
