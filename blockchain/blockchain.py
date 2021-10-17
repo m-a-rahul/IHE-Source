@@ -3,6 +3,7 @@ import hashlib
 import json
 import requests
 from requests.exceptions import ConnectionError
+from decouple import config
 
 
 class Block:
@@ -14,6 +15,7 @@ class Block:
     """
     def __init__(self, nonce, previous_hash, data):
         self.timestamp = str(datetime.datetime.now())
+        self.version = 1
         self.nonce = nonce
         self.previous_hash = previous_hash
         self.data = data
@@ -57,7 +59,7 @@ class Blockchain:
         check = False
         while check is False:
             hash_operation = hashlib.sha256(str(nonce**2 - previous_nonce**2).encode()).hexdigest()
-            if hash_operation[:4] == '0011':
+            if hash_operation[:4] == config('BLOCK_NONCE'):
                 check = True
             else:
                 nonce += 1
@@ -86,7 +88,7 @@ class Blockchain:
             previous_nonce = json.loads(head)['nonce']
             nonce = json.loads(block)['nonce']
             hash_operation = hashlib.sha256(str(nonce**2 - previous_nonce**2).encode()).hexdigest()
-            if hash_operation[:4] != '0011':
+            if hash_operation[:4] != config('BLOCK_NONCE'):
                 return False
             head = block
             index += 1

@@ -20,14 +20,10 @@ class MineBlock(APIView):
             'primary': request.data['primary'],
             'secondary': request.data['secondary'].split(", "),
             'collection': request.data['collection'],
-            'info': request.data['info'],
+            'document': request.data['info'],
         }
-        block = blockchain.create_block(nonce, previous_hash, data)
-        response = {'status': 'success',
-                    'timestamp': block.timestamp,
-                    'data': block.data,
-                    'nonce': block.nonce,
-                    'previous_hash': block.previous_hash}
+        blockchain.create_block(nonce, previous_hash, data)
+        response = {'status': 'success', 'message': 'New block created'}
         return Response(response)
 
 
@@ -44,17 +40,16 @@ class GetChain(APIView):
 class Validate(APIView):
     @staticmethod
     def get(request):
-        response = {'message': 'valid'}
+        response = {'status': 'success', 'message': 'valid'}
         if not blockchain.check_validity(blockchain.chain):
-            response = {'message': 'invalid'}
+            response = {'status': 'success', 'message': 'invalid'}
         return Response(response)
 
 
 class Consensus(APIView):
     @staticmethod
     def get(request):
-        response = {'message': 'valid'}
+        response = {'status': 'success', 'message': 'Chain replaced'}
         if not blockchain.consensus():
-            response = {'message': 'invalid'}
+            response = {'status': 'success', 'message': 'Current chain follows consensus algorithm'}
         return Response(response)
-
