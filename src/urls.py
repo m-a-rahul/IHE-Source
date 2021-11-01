@@ -6,5 +6,6 @@ urlpatterns = [
     path(config('ADMIN_URL'), admin.site.urls),
     path('auth/', include('custom_auth.urls')),
     path('blockchain/', include('blockchain.urls')),
+    path('user-details/', include('user_details.urls')),
     path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
 ]

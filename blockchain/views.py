@@ -37,6 +37,18 @@ class GetChain(APIView):
         return Response(response)
 
 
+class GetUserRecords(APIView):
+    @staticmethod
+    def get(request):
+        username = request.data["username"]
+        if username[:3] == "INP":
+            chain = [json.loads(i) for i in blockchain.chain if json.loads(i)["data"]["primary"] == username]
+        else:
+            chain = [json.loads(i) for i in blockchain.chain if username in json.loads(i)["data"]["secondary"]]
+        response = {'status': 'success', 'chain': chain}
+        return Response(response)
+
+
 class Validate(APIView):
     @staticmethod
     def get(request):

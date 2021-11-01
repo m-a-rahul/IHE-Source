@@ -13,6 +13,7 @@ class Block:
     :param data: <dict> Data to be stored across the block
     :return: <json> Block instance
     """
+
     def __init__(self, nonce, previous_hash, data):
         self.timestamp = str(datetime.datetime.now())
         self.version = 1
@@ -30,7 +31,10 @@ class Blockchain:
         self.chain = []
         self.nodes = {"127.0.0.1:8000", "127.0.0.1:8001"}
         self.data = {}
-        self.create_block(nonce=1, previous_hash='0', data={})
+        self.create_block(nonce=1, previous_hash='0', data={"primary": None,
+                                                            "secondary": [],
+                                                            "collection": None,
+                                                            "document": None})
 
     def create_block(self, nonce, previous_hash, data):
         """
@@ -58,7 +62,7 @@ class Blockchain:
         nonce = 1
         check = False
         while check is False:
-            hash_operation = hashlib.sha256(str(nonce**2 - previous_nonce**2).encode()).hexdigest()
+            hash_operation = hashlib.sha256(str(nonce ** 2 - previous_nonce ** 2).encode()).hexdigest()
             if hash_operation[:4] == config('BLOCK_NONCE'):
                 check = True
             else:
@@ -87,7 +91,7 @@ class Blockchain:
                 return False
             previous_nonce = json.loads(head)['nonce']
             nonce = json.loads(block)['nonce']
-            hash_operation = hashlib.sha256(str(nonce**2 - previous_nonce**2).encode()).hexdigest()
+            hash_operation = hashlib.sha256(str(nonce ** 2 - previous_nonce ** 2).encode()).hexdigest()
             if hash_operation[:4] != config('BLOCK_NONCE'):
                 return False
             head = block
