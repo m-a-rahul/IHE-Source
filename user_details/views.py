@@ -25,7 +25,6 @@ class CreateUpdateUserDetails(APIView):
     def post(request):
         request.data['user'] = request.user.id
         if request.data['update']:
-            print('Update')
             try:
                 if request.user.username[2] == "P":
                     serializer = PatientSerializer(instance=request.user.patient, data=request.data)
@@ -40,7 +39,6 @@ class CreateUpdateUserDetails(APIView):
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
-            print('Create')
             if request.user.username[2] == "P":
                 serializer = PatientSerializer(data=request.data)
             elif request.user.username[2] == "H":
