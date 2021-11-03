@@ -10,9 +10,10 @@ class PatientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Patient
-        fields = ('user', 'dob', 'gender', 'nationality', 'maritial_status',
-                  'occupation', 'arname', 'arno', 'aremail', 'arrelation',
-                  'address', 'pin_code', 'city', 'state', 'mobile', 'aadhar')
+        fields = ('user', 'dob', 'gender', 'nationality', 'marital_status',
+                  'occupation', 'emergency_contact_name', 'emergency_contact_phone',
+                  'emergency_contact_email', 'emergency_contact_relation',
+                  'address', 'zip_code', 'city', 'state', 'mobile')
 
 
 class HospitalSerializer(serializers.ModelSerializer):

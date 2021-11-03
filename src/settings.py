@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_rest_passwordreset',
 
+    'django_countries',
+    'phonenumber_field',
+
     'custom_auth',
     'user_details',
 ]
