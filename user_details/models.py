@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 from phonenumber_field.modelfields import PhoneNumberField
 
 ALPHA_REGEX = RegexValidator('^[a-zA-Z ]*$', 'Only alphabets are allowed')
-PIN_CODE_REGEX = RegexValidator('^[1-9][0-9]*$', 'Only numeric characters of length 6 is allowed')
+ZIP_CODE_REGEX = RegexValidator('^[1-9][0-9]*$', 'Only numeric characters of length 6 is allowed')
 
 
 class Patient(models.Model):
@@ -31,7 +31,7 @@ class Patient(models.Model):
     emergency_contact_email = models.EmailField()
     emergency_contact_relation = models.CharField(max_length=127, validators=[ALPHA_REGEX])
     address = models.CharField(max_length=255)
-    zip_code = models.CharField(max_length=6, validators=[PIN_CODE_REGEX])
+    zip_code = models.CharField(max_length=6, validators=[ZIP_CODE_REGEX])
     city = models.CharField(max_length=127, validators=[ALPHA_REGEX])
     state = models.CharField(max_length=127, validators=[ALPHA_REGEX])
     mobile = PhoneNumberField()
@@ -42,19 +42,14 @@ class Patient(models.Model):
 
 class Hospital(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    doi = models.DateField()
-    imai = models.CharField(max_length=200)
-    bed_count = models.IntegerField()
-    type = models.CharField(max_length=200)
-    contact = models.CharField(max_length=13)
-    landline1 = models.CharField(max_length=200)
-    landline2 = models.CharField(max_length=200, blank=True, null=True)
-    gstin = models.CharField(max_length=200)
-    address = models.TextField()
-    pin_code = models.IntegerField()
-    city = models.CharField(max_length=200)
-    state = models.CharField(max_length=200)
-    email2 = models.EmailField(blank=True, null=True)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    type = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    contact = PhoneNumberField()
+    landline = models.CharField(max_length=15, blank=True, null=True)
+    address = models.CharField(max_length=255)
+    zip_code = models.CharField(max_length=6, validators=[ZIP_CODE_REGEX])
+    city = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    state = models.CharField(max_length=127, validators=[ALPHA_REGEX])
     web = models.URLField(blank=True, null=True)
 
     def __str__(self):

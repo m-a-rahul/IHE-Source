@@ -9,7 +9,7 @@ class Patient(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
-        if not request.user.username[: 3] == "INP":
+        if not request.user.username[2] == "P":
             return Response("Invalid", status=status.HTTP_400_BAD_REQUEST)
         # _mutable = request.data._mutable
         # request.data._mutable = True
@@ -27,7 +27,7 @@ class Hospital(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
-        if not request.user.username[: 3] == "INH":
+        if not request.user.username[2] == "H":
             return Response("Invalid", status=status.HTTP_400_BAD_REQUEST)
         # _mutable = request.data._mutable
         # request.data._mutable = True
