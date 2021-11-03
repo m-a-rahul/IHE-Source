@@ -1,9 +1,9 @@
-from django.urls import path, include
-from .views import Patient, Hospital
+from django.urls import path
+from .views import CreateUpdateUserDetails, GetUserDetails
 
 app_name = 'user_details'
 
 urlpatterns = [
-    path('patient/', Patient.as_view()),
-    path('hospital/', Hospital.as_view()),
+    path('get/', GetUserDetails.as_view()),
+    path('create_update/', CreateUpdateUserDetails.as_view()),
 ]

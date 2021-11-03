@@ -17,10 +17,6 @@ class PatientSerializer(serializers.ModelSerializer):
 
 
 class HospitalSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        instance = self.Meta.model(**validated_data)
-        instance.save()
-        return instance
 
     class Meta:
         model = Hospital

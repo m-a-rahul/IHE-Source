@@ -9,7 +9,7 @@ ZIP_CODE_REGEX = RegexValidator('^[1-9][0-9]*$', 'Only numeric characters of len
 
 
 class Patient(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='patient')
     dob = models.DateField()
     GENDER_CHOICES = [
         ('M', 'Male'),
@@ -33,7 +33,7 @@ class Patient(models.Model):
     address = models.CharField(max_length=255)
     zip_code = models.CharField(max_length=6, validators=[ZIP_CODE_REGEX])
     city = models.CharField(max_length=127, validators=[ALPHA_REGEX])
-    state = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    state = models.CharField(max_length=127)
     mobile = PhoneNumberField()
 
     def __str__(self):
@@ -41,7 +41,7 @@ class Patient(models.Model):
 
 
 class Hospital(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='hospital')
     description = models.CharField(max_length=255, blank=True, null=True)
     type = models.CharField(max_length=127, validators=[ALPHA_REGEX])
     contact = PhoneNumberField()
@@ -49,7 +49,7 @@ class Hospital(models.Model):
     address = models.CharField(max_length=255)
     zip_code = models.CharField(max_length=6, validators=[ZIP_CODE_REGEX])
     city = models.CharField(max_length=127, validators=[ALPHA_REGEX])
-    state = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    state = models.CharField(max_length=127)
     web = models.URLField(blank=True, null=True)
 
     def __str__(self):
