@@ -1,21 +1,13 @@
 from django.contrib import admin
-from .models import *
+from .models import Patient, Hospital, HospitalStaff
 
 
-class DoctorAdmin(admin.TabularInline):
-    model = Doctor
-
-
-class NurseAdmin(admin.TabularInline):
-    model = Nurse
-
-
-class StaffAdmin(admin.TabularInline):
-    model = Staff
+class HospitalStaffAdmin(admin.TabularInline):
+    model = HospitalStaff
 
 
 class HospitalAdmin(admin.ModelAdmin):
-    inlines = [DoctorAdmin, NurseAdmin, StaffAdmin]
+    inlines = [HospitalStaffAdmin]
 
 
 admin.site.register(Hospital, HospitalAdmin)

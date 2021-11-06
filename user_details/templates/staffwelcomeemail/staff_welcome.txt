@@ -1,0 +1,13 @@
+{% autoescape off %}
+Hi {{ username }}
+Here are your login credentials.
+
+Username: {{ username }}
+Password: {{ password }}
+
+You are receiving this email because your hospital registered with your credentials.
+Just so you know: Below includes login username and password
+
+Click on the link below to login
+{{ frontend_url }}
+{% endautoescape %}

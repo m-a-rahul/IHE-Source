@@ -1,12 +1,8 @@
 from rest_framework import serializers
-from .models import Patient, Hospital
+from .models import Patient, Hospital, HospitalStaff
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    def create(self, validated_data):
-        instance = self.Meta.model(**validated_data)
-        instance.save()
-        return instance
 
     class Meta:
         model = Patient
@@ -23,3 +19,11 @@ class HospitalSerializer(serializers.ModelSerializer):
         fields = ('user', 'type', 'description',
                   'contact', 'landline', 'address',
                   'zip_code', 'city', 'state', 'web')
+
+
+class HospitalStaffSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HospitalStaff
+        fields = ('user', 'hos_code', 'role', 'degree',
+                  'department', 'designation', 'contact')

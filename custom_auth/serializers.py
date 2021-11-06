@@ -30,6 +30,13 @@ class UserSerializerWithToken(serializers.ModelSerializer):
         fields = ('token', 'username', 'last_name', 'email', 'password')
 
 
+class UserSerializerWithoutToken(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('username', 'last_name', 'email', 'password')
+
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:

@@ -56,52 +56,20 @@ class Hospital(models.Model):
         return self.user.username
 
 
-class Doctor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+class HospitalStaff(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True, related_name='hospital_staff')
     hos_code = models.ForeignKey(Hospital, on_delete=models.CASCADE)
-    dob = models.DateField()
-    gender = models.CharField(max_length=1)
-    nationality = models.CharField(max_length=200)
-    marital_status = models.CharField(max_length=200)
-    imai = models.CharField(max_length=200)
-    aadharno = models.CharField(max_length=12)
-    degree = models.CharField(max_length=200)
-    department = models.CharField(max_length=200)
-    designation = models.CharField(max_length=200)
-    contact = models.CharField(max_length=13)
-
-    def __str__(self):
-        return self.user.username
-
-
-class Staff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    hos_code = models.ForeignKey(Hospital, on_delete=models.CASCADE)
-    dob = models.DateField()
-    gender = models.CharField(max_length=1)
-    nationality = models.CharField(max_length=200)
-    marital_status = models.CharField(max_length=200)
-    degree = models.CharField(max_length=200)
-    department = models.CharField(max_length=200)
-    aadharno = models.CharField(max_length=12)
-    contact = models.CharField(max_length=13)
-
-    def __str__(self):
-        return self.user.username
-
-
-class Nurse(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    hos_code = models.ForeignKey(Hospital, on_delete=models.CASCADE)
-    dob = models.DateField()
-    gender = models.CharField(max_length=1)
-    nationality = models.CharField(max_length=200)
-    marital_status = models.CharField(max_length=200)
-    imai = models.CharField(max_length=200)
-    degree = models.CharField(max_length=200)
-    department = models.CharField(max_length=200)
-    aadharno = models.CharField(max_length=12)
-    contact = models.CharField(max_length=13)
+    ROLE_CHOICES = [
+        ('D', 'Doctor'),
+        ('N', 'Nurse'),
+        ('S', 'Staff'),
+        ('O', 'Other'),
+    ]
+    role = models.CharField(max_length=1, choices=ROLE_CHOICES)
+    degree = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    department = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    designation = models.CharField(max_length=127, validators=[ALPHA_REGEX])
+    contact = PhoneNumberField()
 
     def __str__(self):
         return self.user.username

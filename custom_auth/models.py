@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.dispatch import receiver
 from django.template.loader import render_to_string
 
+User._meta.get_field('email')._unique = True
 User._meta.get_field('email').blank = False
 User._meta.get_field('email').null = False
 
