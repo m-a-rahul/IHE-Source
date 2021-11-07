@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import GetChain, MineBlock, Validate, Consensus, GetUserRecords
+from blockchain.views import GetChain, MineBlock, Validate, Consensus, GetUserRecords
 
 app_name = 'blockchain'
 

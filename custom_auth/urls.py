@@ -1,6 +1,6 @@
 from django.urls import path, include
-from .views import UserList, CurrentUser
 from rest_framework_jwt.views import obtain_jwt_token
+from custom_auth.views import UserList, CurrentUser
 
 app_name = 'custom_auth'
 

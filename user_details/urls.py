@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CreateUpdateUserDetails, GetUserDetails, HospitalAccounts
+from user_details.views import CreateUpdateUserDetails, GetUserDetails, HospitalAccounts
 
 app_name = 'user_details'
 

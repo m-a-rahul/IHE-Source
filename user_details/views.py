@@ -1,36 +1,38 @@
 import phonenumbers
 import pycountry
+import random
+import string
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
-from custom_auth.serializers import UserSerializer, UserSerializerWithoutToken
-from django.contrib.auth.models import User
-from user_details.models import Hospital, HospitalStaff
-import random
-import string
 from decouple import config
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
+from user_details.serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
+from custom_auth.serializers import UserSerializerWithoutToken
+from user_details.models import Hospital, HospitalStaff
+from custom_auth.views import username_generator
 
 
 def generate_random_password():
     digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     lowercase_characters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h',
-                         'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q',
-                         'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
-                         'z']
+                            'i', 'j', 'k', 'm', 'n', 'o', 'p', 'q',
+                            'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+                            'z']
 
     uppercase_characters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                         'I', 'J', 'K', 'M', 'N', 'O', 'p', 'Q',
-                         'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
-                         'Z']
+                            'I', 'J', 'K', 'M', 'N', 'O', 'p', 'Q',
+                            'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y',
+                            'Z']
 
     symbols = ['@', '#', '$', '%', '=', ':', '?', '.', '/', '|', '~', '>',
                '*', '(', ')', '<']
     characters = digits + uppercase_characters + lowercase_characters + symbols
-    password = [random.choice(lowercase_characters)]
+    password = []
+    password.append(random.choice(lowercase_characters))
     for i in range(10):
         password.append(random.choice(characters))
     random.shuffle(password)
@@ -45,20 +47,13 @@ class HospitalAccounts(APIView):
         response_list = []
         for i in request.data:
             response = {}
-            uid_list = []
-            for user in User.objects.all():
-                uid_list.append(user.username[3:])
-
-            uid = ''.join(random.choice(string.digits) for i in range(2)) + ''.join(random.choice(string.ascii_uppercase) for i in range(2)) + ''.join(random.choice(string.digits) for i in range(3))
-            while uid in uid_list:
-                uid = ''.join(random.choice(string.digits) for i in range(2)) + ''.join(random.choice(string.ascii_uppercase) for i in range(2)) + ''.join(random.choice(string.digits) for i in range(3))
-            country_code = pycountry.countries.search_fuzzy('ind')[0].alpha_2
-            user_role_code = i["role"][0].capitalize()
-            username = country_code+user_role_code+uid
+            country_code = pycountry.countries.search_fuzzy(i["Country"])[0].alpha_2
+            user_role_code = i["Role"][0].capitalize()
+            username = country_code + user_role_code + username_generator()
             password = generate_random_password()
             serializer = UserSerializerWithoutToken(data={'username': username,
-                                                          'last_name': i['name'],
-                                                          'email': i['email'],
+                                                          'last_name': i['Name'],
+                                                          'email': i['Email'],
                                                           'password': password})
             if serializer.is_valid():
                 serializer.save()
@@ -68,21 +63,21 @@ class HospitalAccounts(APIView):
                 user_id = user.id
                 hos_code = Hospital.objects.get(user=request.user)
                 phone_prefix = '+' + str(phonenumbers.country_code_for_region(country_code))
-                contact = phone_prefix + i['contact']
+                contact = phone_prefix + i['Contact']
                 staff_serializer = HospitalStaffSerializer(data={'user': user_id,
                                                                  'hos_code': hos_code,
                                                                  'role': user_role_code,
-                                                                 'degree': i["degree"],
-                                                                 'designation': i["designation"],
-                                                                 'department': i['department'],
+                                                                 'degree': i["Degree"],
+                                                                 'designation': i["Designation"],
+                                                                 'department': i['Department'],
                                                                  'contact': contact})
                 if staff_serializer.is_valid():
                     staff_serializer.save()
                     context = {
                         'password': password,
                         'username': username,
-                        'email': i['email'],
-                        'last_name': i['name'],
+                        'email': i['Email'],
+                        'last_name': i['Name'],
                         'frontend_url': config('FRONTEND_URL')
                     }
 
@@ -97,7 +92,7 @@ class HospitalAccounts(APIView):
                         # from:
                         "ihe@dailyfishmart.com",
                         # to:
-                        [i['email']]
+                        [i['Email']]
                     )
                     msg.attach_alternative(email_html_message, "text/html")
                     msg.send()
@@ -111,8 +106,9 @@ class HospitalAccounts(APIView):
             else:
                 response["status"] = "failure"
                 try:
-                    HospitalStaff.objects.get(hos_code=request.user.id, user=User.objects.get(email=i["email"]).id)
-                    response["message"] = {'user': ['There is an user with this email already associated with this hospital']}
+                    HospitalStaff.objects.get(hos_code=request.user.id, user=User.objects.get(email=i["Email"]).id)
+                    response["message"] = {
+                        'user': ['There is an user with this email already associated with this hospital']}
                 except:
                     response["message"] = serializer.errors
 
@@ -169,4 +165,3 @@ class CreateUpdateUserDetails(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-

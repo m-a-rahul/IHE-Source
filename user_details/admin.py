@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Patient, Hospital, HospitalStaff
+from user_details.models import Patient, Hospital, HospitalStaff
 
 
 class HospitalStaffAdmin(admin.TabularInline):

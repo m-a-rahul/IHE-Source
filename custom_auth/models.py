@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User
-from admin_honeypot.signals import honeypot
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.dispatch import receiver
 from django.template.loader import render_to_string
+from admin_honeypot.signals import honeypot
 
 User._meta.get_field('email')._unique = True
 User._meta.get_field('email').blank = False
