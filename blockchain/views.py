@@ -12,18 +12,21 @@ class MineBlock(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
-        previous_block = blockchain.get_tail_block()
-        previous_nonce = json.loads(previous_block)['nonce']
-        nonce = blockchain.get_nonce(previous_nonce)
-        previous_hash = blockchain.get_hash(previous_block)
-        data = {
-            'primary': request.data['primary'],
-            'secondary': request.data['secondary'].split(", "),
-            'collection': request.data['collection'],
-            'document': request.data['info'],
-        }
-        blockchain.create_block(nonce, previous_hash, data)
-        response = {'status': 'success', 'message': 'New block created'}
+        blockchain.consensus()
+        response = {'status': 'success', 'message': 'invalid'}
+        if blockchain.check_validity(blockchain.chain):
+            previous_block = blockchain.get_tail_block()
+            previous_nonce = json.loads(previous_block)['nonce']
+            nonce = blockchain.get_nonce(previous_nonce)
+            previous_hash = blockchain.get_hash(previous_block)
+            data = {
+                'primary': request.data['primary'],
+                'secondary': request.data['secondary'].split(", "),
+                'collection': request.data['collection'],
+                'document': request.data['info'],
+            }
+            blockchain.create_block(nonce, previous_hash, data)
+            response = {'status': 'success', 'message': 'New block created'}
         return Response(response)
 
 
@@ -32,36 +35,9 @@ class GetChain(APIView):
 
     @staticmethod
     def get(request):
-        response = {'chain': [json.loads(i) for i in blockchain.chain],
-                    'length': len(blockchain.chain)}
-        return Response(response)
-
-
-class GetUserRecords(APIView):
-    @staticmethod
-    def get(request):
-        username = request.data["username"]
-        if username[:3] == "INP":
-            chain = [json.loads(i) for i in blockchain.chain if json.loads(i)["data"]["primary"] == username]
-        else:
-            chain = [json.loads(i) for i in blockchain.chain if username in json.loads(i)["data"]["secondary"]]
-        response = {'status': 'success', 'chain': chain}
-        return Response(response)
-
-
-class Validate(APIView):
-    @staticmethod
-    def get(request):
-        response = {'status': 'success', 'message': 'valid'}
-        if not blockchain.check_validity(blockchain.chain):
-            response = {'status': 'success', 'message': 'invalid'}
-        return Response(response)
-
-
-class Consensus(APIView):
-    @staticmethod
-    def get(request):
-        response = {'status': 'success', 'message': 'Chain replaced'}
-        if not blockchain.consensus():
-            response = {'status': 'success', 'message': 'Current chain follows consensus algorithm'}
+        blockchain.consensus()
+        response = {'status': 'success', 'message': 'invalid'}
+        if blockchain.check_validity(blockchain.chain):
+            response = {'chain': [json.loads(i) for i in blockchain.chain],
+                        'length': len(blockchain.chain)}
         return Response(response)

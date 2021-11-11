@@ -1,7 +1,6 @@
 import phonenumbers
 import pycountry
 import random
-import string
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
