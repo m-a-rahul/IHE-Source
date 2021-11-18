@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from blockchain.blockchain import Blockchain
 from custom_auth.serializers import UserSerializer
+from user_details.models import HospitalStaff
 
 blockchain = Blockchain()
 
@@ -14,7 +15,20 @@ class MineBlock(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
+        secondary = []
+        try:
+            User.objects.get(username=request.data["primary"])
+        except User.DoesNotExist:
+            response = {'status': 'success', 'message': 'Invalid Patient ID'}
+            return Response(response)
+        try:
+            secondary.append(request.user.username)
+            secondary.append(request.user.hospital_staff.hos_code.user.username)
+        except HospitalStaff.DoesNotExist:
+            response = {'status': 'success', 'message': 'Unauthorised to Mine'}
+            return Response(response)
         response = {'status': 'success', 'message': 'invalid'}
+
         if blockchain.check_validity(blockchain.chain):
             previous_block = blockchain.get_tail_block()
             previous_nonce = json.loads(previous_block)['nonce']
@@ -22,9 +36,9 @@ class MineBlock(APIView):
             previous_hash = blockchain.get_hash(previous_block)
             data = {
                 'primary': request.data['primary'],
-                'secondary': request.data['secondary'].split(", "),
+                'secondary': secondary,
                 'collection': request.data['collection'],
-                'document': request.data['info'],
+                'document': request.data['document'],
             }
             blockchain.create_block(nonce, previous_hash, data)
             response = {'status': 'success', 'message': 'New block created'}
@@ -58,10 +72,14 @@ class RetrieveRecords(APIView):
                         if collection == i["data"]["collection"]:
                             result = {}
                             secondary_actors = []
+                            documents = []
                             for j in i["data"]["secondary"]:
                                 secondary_actors.append(UserSerializer(User.objects.get(username=j), many=False).data)
                             result["secondary"] = secondary_actors
-                            result["document"] = i["data"]["document"]
+                            result["timestamp"] = i["timestamp"]
+                            for k in i["data"]["document"]:
+                                documents.append(k)
+                            result["document"] = documents
                             response_list.append(result)
                     else:
                         response_list.append(i["data"]["collection"])
