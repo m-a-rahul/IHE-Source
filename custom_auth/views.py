@@ -28,7 +28,7 @@ def username_generator():
     return uid
 
 
-class UserList(APIView):
+class CreateUser(APIView):
     permission_classes = (permissions.AllowAny,)
 
     @staticmethod
@@ -38,15 +38,15 @@ class UserList(APIView):
         serializer = UserSerializerWithToken(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': 'success', 'data': serializer.data})
+        return Response({'status': 'failure', 'message': serializer.errors})
 
 
 class CurrentUser(APIView):
     @staticmethod
     def get(request):
         serializer = UserSerializer(request.user)
-        return Response(serializer.data)
+        return Response({'status': 'success', 'data': serializer.data})
 
 
 @receiver(reset_password_token_created)

@@ -5,13 +5,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
-from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from decouple import config
 from user_details.serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
 from custom_auth.serializers import UserSerializerWithoutToken
-from user_details.models import Hospital, HospitalStaff
+from user_details.models import Hospital, HospitalStaff, Patient
 from custom_auth.views import username_generator
 
 
@@ -108,12 +107,12 @@ class HospitalAccounts(APIView):
                     HospitalStaff.objects.get(hos_code=request.user.id, user=User.objects.get(email=i["Email"]).id)
                     response["message"] = {
                         'user': ['There is an user with this email already associated with this hospital']}
-                except:
+                except HospitalStaff.DoesNotExist:
                     response["message"] = serializer.errors
 
             response_list.append(response)
 
-        return Response(response_list, status=status.HTTP_200_OK)
+        return Response({'status': 'success', 'data': response_list})
 
 
 class GetUserDetails(APIView):
@@ -127,9 +126,13 @@ class GetUserDetails(APIView):
                 serializer = HospitalSerializer(request.user.hospital, many=False)
             else:
                 serializer = HospitalStaffSerializer(request.user.hospital_staff, many=False)
-            return Response(serializer.data)
-        except:
-            return Response('RelatedObjectDoesNotExist', status=status.HTTP_200_OK)
+            return Response({'status': 'success', 'data': serializer.data})
+        except Patient.DoesNotExist:
+            return Response({'status': 'failure', 'message': 'Patient details does not exists'})
+        except Hospital.DoesNotExist:
+            return Response({'status': 'failure', 'message': 'Hospital details does not exists'})
+        except HospitalStaff.DoesNotExist:
+            return Response({'status': 'failure', 'message': 'Hospital Staff details does not exists'})
 
 
 class CreateUpdateUserDetails(APIView):
@@ -147,13 +150,17 @@ class CreateUpdateUserDetails(APIView):
                 else:
                     request.data['hos_code'] = request.user.hospital_staff.hos_code.user.id
                     serializer = HospitalStaffSerializer(instance=request.user.hospital_staff, data=request.data)
-            except:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+            except Patient.DoesNotExist:
+                return Response({'status': 'failure', 'message': 'Patient details does not exists'})
+            except Hospital.DoesNotExist:
+                return Response({'status': 'failure', 'message': 'Hospital details does not exists'})
+            except HospitalStaff.DoesNotExist:
+                return Response({'status': 'failure', 'message': 'Hospital Staff details does not exists'})
 
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'status': 'success', 'data': serializer.data})
+            return Response({'status': 'failure', 'message': serializer.errors})
         else:
             if request.user.username[2] == "P":
                 serializer = PatientSerializer(data=request.data)
@@ -162,5 +169,5 @@ class CreateUpdateUserDetails(APIView):
 
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'status': 'success', 'data': serializer.data})
+            return Response({'status': 'failure', 'message': serializer.errors})

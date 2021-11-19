@@ -88,7 +88,7 @@ class RetrieveRecords(APIView):
                         response_list.append(data["collection"])
             if not collection:
                 response_list = list(set(response_list))
-            response = {'status': 'success', 'result': response_list}
+            response = {'status': 'success', 'data': response_list}
         return Response(response)
 
 
