@@ -1,4 +1,6 @@
 import json
+import cryptocode
+from decouple import config
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
@@ -19,15 +21,15 @@ class MineBlock(APIView):
         try:
             User.objects.get(username=request.data["primary"])
         except User.DoesNotExist:
-            response = {'status': 'success', 'message': 'Invalid Patient ID'}
+            response = {'status': 'failure', 'message': 'Patient ID does not exist'}
             return Response(response)
         try:
             secondary.append(request.user.username)
             secondary.append(request.user.hospital_staff.hos_code.user.username)
         except HospitalStaff.DoesNotExist:
-            response = {'status': 'success', 'message': 'Unauthorised to Mine'}
+            response = {'status': 'failure', 'message': 'Unauthorised to Mine'}
             return Response(response)
-        response = {'status': 'success', 'message': 'invalid'}
+        response = {'status': 'failure', 'message': 'Invalid chain'}
 
         if blockchain.check_validity(blockchain.chain):
             previous_block = blockchain.get_tail_block()
@@ -50,7 +52,7 @@ class GetChain(APIView):
 
     @staticmethod
     def get(request):
-        response = {'status': 'success', 'message': 'invalid'}
+        response = {'status': 'failure', 'message': 'Invalid chain'}
         if blockchain.check_validity(blockchain.chain):
             response = {'status': 'success',
                         'chain': [json.loads(i) for i in blockchain.chain],
@@ -61,28 +63,29 @@ class GetChain(APIView):
 class RetrieveRecords(APIView):
     @staticmethod
     def get(request):
-        response = {'status': 'success', 'message': 'invalid'}
+        response = {'status': 'failure', 'message': 'Invalid chain'}
         if blockchain.check_validity(blockchain.chain):
             chain = [json.loads(i) for i in blockchain.chain]
             response_list = []
             collection = request.query_params.get('collection')
             for i in chain[1:]:
-                if i["data"]["primary"] == request.user.username:
+                data = json.loads(cryptocode.decrypt(i["data"], config('BLOCK_CRYPTO_KEY')))
+                if data["primary"] == request.user.username:
                     if collection:
-                        if collection == i["data"]["collection"]:
+                        if collection == data["collection"]:
                             result = {}
                             secondary_actors = []
                             documents = []
-                            for j in i["data"]["secondary"]:
+                            for j in data["secondary"]:
                                 secondary_actors.append(UserSerializer(User.objects.get(username=j), many=False).data)
                             result["secondary"] = secondary_actors
                             result["timestamp"] = i["timestamp"]
-                            for k in i["data"]["document"]:
+                            for k in data["document"]:
                                 documents.append(k)
                             result["document"] = documents
                             response_list.append(result)
                     else:
-                        response_list.append(i["data"]["collection"])
+                        response_list.append(data["collection"])
             if not collection:
                 response_list = list(set(response_list))
             response = {'status': 'success', 'result': response_list}

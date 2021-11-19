@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import requests
+import cryptocode
 from requests.exceptions import ConnectionError
 from decouple import config
 
@@ -19,7 +20,7 @@ class Block:
         self.version = 1
         self.nonce = nonce
         self.previous_hash = previous_hash
-        self.data = data
+        self.data = cryptocode.encrypt(json.dumps(data), config('BLOCK_CRYPTO_KEY'))
 
     def jsonify(self):
         return json.dumps(self.__dict__)
