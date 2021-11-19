@@ -17,12 +17,15 @@ class MineBlock(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
-        secondary = []
+        # Check if Primary actor exists
         try:
             User.objects.get(username=request.data["primary"])
         except User.DoesNotExist:
             response = {'status': 'failure', 'message': 'Patient ID does not exist'}
             return Response(response)
+        secondary = []
+
+        # Collect Secondary Actors
         try:
             secondary.append(request.user.username)
             secondary.append(request.user.hospital_staff.hos_code.user.username)
@@ -31,6 +34,7 @@ class MineBlock(APIView):
             return Response(response)
         response = {'status': 'failure', 'message': 'Invalid chain'}
 
+        # Mine
         if blockchain.check_validity(blockchain.chain):
             previous_block = blockchain.get_tail_block()
             previous_nonce = json.loads(previous_block)['nonce']
@@ -71,6 +75,8 @@ class RetrieveRecords(APIView):
             for i in chain[1:]:
                 data = json.loads(cryptocode.decrypt(i["data"], config('BLOCK_CRYPTO_KEY')))
                 if data["primary"] == request.user.username:
+
+                    # Retrieve Documents
                     if collection:
                         if collection == data["collection"]:
                             result = {}
@@ -84,8 +90,12 @@ class RetrieveRecords(APIView):
                                 documents.append(k)
                             result["document"] = documents
                             response_list.append(result)
+
+                    # Retrieve Collections
                     else:
                         response_list.append(data["collection"])
+
+            # Remove duplicate collections
             if not collection:
                 response_list = list(set(response_list))
             response = {'status': 'success', 'data': response_list}

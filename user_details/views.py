@@ -44,6 +44,8 @@ class HospitalAccounts(APIView):
     def post(request):
         response_list = []
         for i in request.data:
+
+            # Create User
             response = {}
             country_code = pycountry.countries.search_fuzzy(i["Country"])[0].alpha_2
             user_role_code = i["Role"][0].capitalize()
@@ -54,6 +56,7 @@ class HospitalAccounts(APIView):
                                                           'email': i['Email'],
                                                           'password': password})
             if serializer.is_valid():
+                # Create Staff Details
                 serializer.save()
                 user = User.objects.get(username=username)
                 user.set_password(password)
@@ -70,6 +73,8 @@ class HospitalAccounts(APIView):
                                                                  'department': i['Department'],
                                                                  'contact': contact})
                 if staff_serializer.is_valid():
+
+                    # Send Welcome message with username and password
                     staff_serializer.save()
                     context = {
                         'password': password,
@@ -140,6 +145,8 @@ class CreateUpdateUserDetails(APIView):
     @csrf_exempt
     def post(request):
         request.data['user'] = request.user.id
+
+        # Update Request
         if request.data['update']:
             try:
                 if request.user.username[2] == "P":
@@ -161,6 +168,8 @@ class CreateUpdateUserDetails(APIView):
                 serializer.save()
                 return Response({'status': 'success', 'data': serializer.data})
             return Response({'status': 'failure', 'message': serializer.errors})
+
+        # Create Request
         else:
             if request.user.username[2] == "P":
                 serializer = PatientSerializer(data=request.data)
