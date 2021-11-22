@@ -17,6 +17,7 @@ class MineBlock(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
+        blockchain.consensus()
         # Check if Primary actor exists
         try:
             User.objects.get(username=request.data["primary"])
@@ -67,6 +68,7 @@ class GetChain(APIView):
 class RetrieveRecords(APIView):
     @staticmethod
     def get(request):
+        blockchain.consensus()
         response = {'status': 'failure', 'message': 'Invalid chain'}
         if blockchain.check_validity(blockchain.chain):
             chain = [json.loads(i) for i in blockchain.chain]
@@ -99,13 +101,4 @@ class RetrieveRecords(APIView):
             if not collection:
                 response_list = list(set(response_list))
             response = {'status': 'success', 'data': response_list}
-        return Response(response)
-
-
-class Consensus(APIView):
-    @staticmethod
-    def get(request):
-        response = {'status': 'success', 'message': 'valid'}
-        if not blockchain.consensus():
-            response = {'status': 'success', 'message': 'invalid'}
         return Response(response)
