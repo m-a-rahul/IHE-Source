@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from decouple import config
 from user_details.serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
-from custom_auth.serializers import UserSerializerWithoutToken
+from custom_auth.serializers import UserSerializerWithoutToken, UserSerializer
 from user_details.models import Hospital, HospitalStaff, Patient
 from custom_auth.views import username_generator
 
@@ -37,7 +37,7 @@ def generate_random_password():
     return "".join(password)
 
 
-class HospitalAccounts(APIView):
+class CreateHospitalStaff(APIView):
 
     @staticmethod
     @csrf_exempt
@@ -180,3 +180,18 @@ class CreateUpdateUserDetails(APIView):
                 serializer.save()
                 return Response({'status': 'success', 'data': serializer.data})
             return Response({'status': 'failure', 'message': serializer.errors})
+
+
+class GetHospitalStaffDetails(APIView):
+    @staticmethod
+    @csrf_exempt
+    def get(request):
+        if not request.user.username[2] == "H":
+            return Response({'status': 'failure', 'message': "Unauthorized access"})
+        response_list = []
+        for i in HospitalStaff.objects.filter(hos_code=request.user.hospital):
+            staff_serializer = dict(HospitalStaffSerializer(i, many=False).data)
+            user_serializer = dict(UserSerializer(i.user, many=False).data)
+            user_serializer.update(staff_serializer)
+            response_list.append(user_serializer)
+        return Response({'status': 'success', 'data': response_list})
