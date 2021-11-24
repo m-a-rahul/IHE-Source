@@ -73,3 +73,11 @@ class HospitalStaff(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+class BlockchainAccess(models.Model):
+    primary = models.ForeignKey(Patient, related_name="primary_actors", on_delete=models.CASCADE)
+    secondary = models.ForeignKey(Hospital, related_name="secondary_actors", on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("primary", "secondary")
