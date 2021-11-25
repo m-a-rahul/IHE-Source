@@ -81,3 +81,13 @@ class BlockchainAccess(models.Model):
 
     class Meta:
         unique_together = ("primary", "secondary")
+
+
+class BlockchainAccessOtp(models.Model):
+    primary = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    secondary = models.ForeignKey(Hospital, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ("primary", "secondary")

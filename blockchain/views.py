@@ -1,17 +1,30 @@
 import json
 import cryptocode
+import math
+import random
 from decouple import config
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from blockchain.blockchain import Blockchain
 from custom_auth.serializers import UserSerializer
 from user_details.serializers import PatientSerializer
-from user_details.models import HospitalStaff, BlockchainAccess, Patient
+from user_details.models import HospitalStaff, BlockchainAccess, Patient, BlockchainAccessOtp
 
 blockchain = Blockchain()
+
+
+def generate_otp():
+    string = '0123456789'
+    otp = ""
+    length = len(string)
+    for i in range(6):
+        otp += string[math.floor(random.random() * length)]
+    return otp
 
 
 class MineBlock(APIView):
@@ -125,6 +138,59 @@ class RetrieveRecords(APIView):
         return Response(response)
 
 
+class RequestAccess(APIView):
+    @staticmethod
+    def post(request):
+        try:
+            request.user.hospital_staff
+        except HospitalStaff.DoesNotExist:
+            response = {'status': 'failure', 'message': 'Unauthorised'}
+            return Response(response)
+        # Check if Patient actor exists
+        try:
+            primary_actor = User.objects.get(username=request.data["primary"]).patient
+        except User.DoesNotExist:
+            response = {'status': 'failure', 'message': 'Patient ID does not exist'}
+            return Response(response)
+        except Patient.DoesNotExist:
+            response = {'status': 'failure', 'message': 'Patient ID does not exist'}
+            return Response(response)
+        secondary_actor = request.user.hospital_staff.hos_code
+
+        try:
+            i = BlockchainAccessOtp.objects.get(primary=primary_actor, secondary=secondary_actor)
+            i.delete()
+        except BlockchainAccessOtp.DoesNotExist:
+            pass
+
+        otp = generate_otp()
+        instance = BlockchainAccessOtp(primary=primary_actor, secondary=secondary_actor, otp=otp)
+        instance.save()
+        context = {
+            'last_name': primary_actor.user.last_name,
+            'hospital': secondary_actor.user.last_name,
+            'otp': otp,
+        }
+
+        email_html_message = render_to_string('blockchainaccessotpemail/blockchain_access_otp.html', context)
+        email_plaintext_message = render_to_string('blockchainaccessotpemail/blockchain_access_otp.txt', context)
+
+        msg = EmailMultiAlternatives(
+            # title:
+            "Welcome to IHE",
+            # message:
+            email_plaintext_message,
+            # from:
+            "ihe@dailyfishmart.com",
+            # to:
+            [primary_actor.user.email]
+        )
+        msg.attach_alternative(email_html_message, "text/html")
+        msg.send()
+        response = {'status': 'success', 'message': 'OTP Sent to patients email id'}
+        return Response(response)
+
+
 class GainAccess(APIView):
     @staticmethod
     def post(request):
@@ -140,8 +206,15 @@ class GainAccess(APIView):
             response = {'status': 'failure', 'message': 'Patient ID does not exist'}
             return Response(response)
         secondary_actor = request.user.hospital_staff.hos_code
-        instance = BlockchainAccess(primary=primary_actor, secondary=secondary_actor)
+        otp = request.data["otp"]
+        try:
+            i = BlockchainAccessOtp.objects.get(primary=primary_actor, secondary=secondary_actor, otp=otp)
+        except BlockchainAccessOtp.DoesNotExist:
+            response = {'status': 'failure', 'message': 'Invalid OTP'}
+            return Response(response)
+        instance = BlockchainAccess(primary=i.primary, secondary=i.secondary)
         instance.save()
+        i.delete()
         response = {'status': 'success', 'message': 'Access granted'}
         return Response(response)
 
@@ -161,12 +234,15 @@ class CheckAccess(APIView):
             response = {'status': 'failure', 'message': 'Patient ID does not exist'}
             return Response(response)
         secondary_actor = request.user.hospital_staff.hos_code
+        patient_serializer = dict(PatientSerializer(Patient.objects.get(user=primary_actor), many=False).data)
+        user_serializer = dict(UserSerializer(User.objects.get(username=request.data["primary"]), many=False).data)
+        user_serializer.update(patient_serializer)
         try:
             BlockchainAccess.objects.get(primary=primary_actor, secondary=secondary_actor)
         except BlockchainAccess.DoesNotExist:
-            response = {'status': 'success', 'message': 'DENIED'}
+            response = {'status': 'success', 'message': 'DENIED', 'data': user_serializer}
             return Response(response)
-        response = {'status': 'success', 'message': 'GRANTED'}
+        response = {'status': 'success', 'message': 'GRANTED', 'data': user_serializer}
         return Response(response)
 
 

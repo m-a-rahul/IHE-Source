@@ -1,5 +1,5 @@
 from django.contrib import admin
-from user_details.models import Patient, Hospital, HospitalStaff
+from user_details.models import Patient, Hospital, HospitalStaff, BlockchainAccess, BlockchainAccessOtp
 
 
 class HospitalStaffAdmin(admin.TabularInline):
@@ -12,3 +12,5 @@ class HospitalAdmin(admin.ModelAdmin):
 
 admin.site.register(Hospital, HospitalAdmin)
 admin.site.register(Patient)
+admin.site.register(BlockchainAccess)
+admin.site.register(BlockchainAccessOtp)
