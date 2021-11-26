@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 from django_rest_passwordreset.signals import reset_password_token_created
 from decouple import config
 from custom_auth.serializers import UserSerializer, UserSerializerWithToken
+from user_details.models import Patient, HospitalStaff, Hospital
+from user_details.serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
 
 
 def username_generator():
@@ -45,8 +47,31 @@ class CreateUser(APIView):
 class CurrentUser(APIView):
     @staticmethod
     def get(request):
-        serializer = UserSerializer(request.user)
-        return Response({'status': 'success', 'data': serializer.data})
+        user_serializer = dict(UserSerializer(request.user).data)
+        try:
+            if request.user.username[2] == "P":
+                detail_serializer = dict(PatientSerializer(request.user.patient, many=False).data)
+                detail_serializer["user_details"] = "present"
+                detail_serializer["user_type"] = "patient"
+            elif request.user.username[2] == "H":
+                detail_serializer = dict(HospitalSerializer(request.user.hospital, many=False).data)
+                detail_serializer["user_details"] = "present"
+                detail_serializer["user_type"] = "hospital"
+            else:
+                detail_serializer = dict(HospitalStaffSerializer(request.user.hospital_staff, many=False).data)
+                detail_serializer["user_details"] = "present"
+                detail_serializer["user_type"] = "hospital_staff"
+            user_serializer.update(detail_serializer)
+        except Patient.DoesNotExist:
+            user_serializer["user_details"] = "absent"
+            user_serializer["user_type"] = "patient"
+        except Hospital.DoesNotExist:
+            user_serializer["user_details"] = "absent"
+            user_serializer["user_type"] = "hospital"
+        except HospitalStaff.DoesNotExist:
+            user_serializer["user_details"] = "absent"
+            user_serializer["user_type"] = "hospital_staff"
+        return Response({'status': 'success', 'data': user_serializer})
 
 
 @receiver(reset_password_token_created)

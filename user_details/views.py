@@ -120,26 +120,6 @@ class CreateHospitalStaff(APIView):
         return Response({'status': 'success', 'data': response_list})
 
 
-class GetUserDetails(APIView):
-    @staticmethod
-    @csrf_exempt
-    def get(request):
-        try:
-            if request.user.username[2] == "P":
-                serializer = PatientSerializer(request.user.patient, many=False)
-            elif request.user.username[2] == "H":
-                serializer = HospitalSerializer(request.user.hospital, many=False)
-            else:
-                serializer = HospitalStaffSerializer(request.user.hospital_staff, many=False)
-            return Response({'status': 'success', 'data': serializer.data})
-        except Patient.DoesNotExist:
-            return Response({'status': 'failure', 'message': 'Patient details does not exists'})
-        except Hospital.DoesNotExist:
-            return Response({'status': 'failure', 'message': 'Hospital details does not exists'})
-        except HospitalStaff.DoesNotExist:
-            return Response({'status': 'failure', 'message': 'Hospital Staff details does not exists'})
-
-
 class CreateUpdateUserDetails(APIView):
     @staticmethod
     @csrf_exempt
