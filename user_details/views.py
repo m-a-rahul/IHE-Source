@@ -42,6 +42,11 @@ class CreateHospitalStaff(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
+        try:
+            Hospital.objects.get(user=request.user)
+        except Hospital.DoesNotExist:
+            return Response({'status': 'failure', 'message': 'Unauthorised'})
+
         response_list = []
         for i in request.data:
 
@@ -129,13 +134,11 @@ class CreateUpdateUserDetails(APIView):
         # Update Request
         if request.data['update']:
             try:
-                if request.user.username[2] == "P":
+                if request.user.patient:
                     serializer = PatientSerializer(instance=request.user.patient, data=request.data)
-
-                elif request.user.username[2] == "H":
+                elif request.user.hospital:
                     serializer = HospitalSerializer(instance=request.user.hospital, data=request.data)
-                else:
-                    request.data['hos_code'] = request.user.hospital_staff.hos_code.user.id
+                elif request.user.hospital_staff:
                     serializer = HospitalStaffSerializer(instance=request.user.hospital_staff, data=request.data)
             except Patient.DoesNotExist:
                 return Response({'status': 'failure', 'message': 'Patient details does not exists'})
@@ -166,8 +169,11 @@ class GetHospitalStaffDetails(APIView):
     @staticmethod
     @csrf_exempt
     def get(request):
-        if not request.user.username[2] == "H":
-            return Response({'status': 'failure', 'message': "Unauthorized access"})
+        try:
+            Hospital.objects.get(user=request.user)
+        except Hospital.DoesNotExist:
+            return Response({'status': 'failure', 'message': 'Unauthorised'})
+
         response_list = []
         for i in HospitalStaff.objects.filter(hos_code=request.user.hospital):
             staff_serializer = dict(HospitalStaffSerializer(i, many=False).data)
