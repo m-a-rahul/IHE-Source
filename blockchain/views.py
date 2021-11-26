@@ -39,9 +39,16 @@ class MineBlock(APIView):
         blockchain.consensus()
         # Check if Primary actor exists
         try:
-            User.objects.get(username=request.data["primary"])
-        except User.DoesNotExist:
+            primary_actor = User.objects.get(username=request.data["primary"]).patient
+        except Patient.DoesNotExist:
             response = {'status': 'failure', 'message': 'Patient ID does not exist'}
+            return Response(response)
+        try:
+            BlockchainAccess.objects.get(primary=primary_actor,
+                                         secondary=request.user.hospital_staff.hos_code)
+        except BlockchainAccess.DoesNotExist:
+            response = {'status': 'failure',
+                        'message': 'You do not have access to add records to this patient'}
             return Response(response)
         secondary = []
 
@@ -101,6 +108,18 @@ class RetrieveRecords(APIView):
                     primary = request.query_params.get('primary')
                     if not primary:
                         response = {'status': 'failure', 'message': 'Missing parameters'}
+                        return Response(response)
+                    try:
+                        primary_actor = User.objects.get(username=primary).patient
+                    except Patient.DoesNotExist:
+                        response = {'status': 'failure', 'message': 'Patient ID does not exist'}
+                        return Response(response)
+                    try:
+                        BlockchainAccess.objects.get(primary=primary_actor,
+                                                     secondary=request.user.hospital_staff.hos_code)
+                    except BlockchainAccess.DoesNotExist:
+                        response = {'status': 'failure',
+                                    'message': 'You do not have access to add records to this patient'}
                         return Response(response)
             except HospitalStaff.DoesNotExist:
                 primary = None
