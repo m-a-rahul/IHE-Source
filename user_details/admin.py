@@ -12,5 +12,5 @@ class HospitalAdmin(admin.ModelAdmin):
 
 admin.site.register(Hospital, HospitalAdmin)
 admin.site.register(Patient)
-admin.site.register(BlockchainAccess)
-admin.site.register(BlockchainAccessOtp)
+# admin.site.register(BlockchainAccess)
+# admin.site.register(BlockchainAccessOtp)
