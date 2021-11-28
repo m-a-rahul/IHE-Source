@@ -32,36 +32,39 @@ class MineBlock(APIView):
     @staticmethod
     @csrf_exempt
     def post(request):
-        # Only Hospital Staff are allowed to mine patient records
-        try:
-            request.user.hospital_staff
-        except HospitalStaff.DoesNotExist:
-            response = {'status': 'failure', 'message': 'Unauthorised'}
-            return Response(response)
+        if request.user.username[2] == "P":
+            secondary = ['smart_entry']
+        else:
+            # Only Hospital Staff are allowed to mine patient records
+            try:
+                request.user.hospital_staff
+            except HospitalStaff.DoesNotExist:
+                response = {'status': 'failure', 'message': 'Unauthorised'}
+                return Response(response)
 
-        # Check if patient id exists
-        try:
-            primary_actor = User.objects.get(username=request.data["primary"]).patient
-        except Patient.DoesNotExist:
-            response = {'status': 'failure', 'message': 'Patient ID does not exist'}
-            return Response(response)
-        except User.DoesNotExist:
-            response = {'status': 'failure', 'message': 'Patient ID does not exist'}
-            return Response(response)
+            # Check if patient id exists
+            try:
+                primary_actor = User.objects.get(username=request.data["primary"]).patient
+            except Patient.DoesNotExist:
+                response = {'status': 'failure', 'message': 'Patient ID does not exist'}
+                return Response(response)
+            except User.DoesNotExist:
+                response = {'status': 'failure', 'message': 'Patient ID does not exist'}
+                return Response(response)
 
-        # Check if hospital staff has access to add/view this particular patient
-        try:
-            BlockchainAccess.objects.get(primary=primary_actor,
-                                         secondary=request.user.hospital_staff.hos_code)
-        except BlockchainAccess.DoesNotExist:
-            response = {'status': 'failure',
-                        'message': 'You do not have access to add records to this patient'}
-            return Response(response)
+            # Check if hospital staff has access to add/view this particular patient
+            try:
+                BlockchainAccess.objects.get(primary=primary_actor,
+                                             secondary=request.user.hospital_staff.hos_code)
+            except BlockchainAccess.DoesNotExist:
+                response = {'status': 'failure',
+                            'message': 'You do not have access to add records to this patient'}
+                return Response(response)
 
-        # Collect Secondary Actors
-        secondary = []
-        secondary.append(request.user.username)
-        secondary.append(request.user.hospital_staff.hos_code.user.username)
+            # Collect Secondary Actors
+            secondary = []
+            secondary.append(request.user.username)
+            secondary.append(request.user.hospital_staff.hos_code.user.username)
 
         # Mine
         response = {'status': 'failure', 'message': 'Invalid chain'}
@@ -71,11 +74,14 @@ class MineBlock(APIView):
             previous_nonce = json.loads(previous_block)['nonce']
             nonce = blockchain.get_nonce(previous_nonce)
             previous_hash = blockchain.get_hash(previous_block)
+            document = request.data["document"]
+            if 'smart_entry' in secondary:
+                document = [request.data["document"]]
             data = {
                 'primary': request.data['primary'],
                 'secondary': secondary,
                 'collection': request.data['collection'],
-                'document': request.data['document'],
+                'document': document,
             }
             blockchain.create_block(nonce, previous_hash, data)
             response = {'status': 'success', 'message': 'New block created'}
@@ -156,8 +162,12 @@ class RetrieveRecords(APIView):
                             result = {}
                             secondary_actors = []
                             documents = []
-                            for j in data["secondary"]:
-                                secondary_actors.append(UserSerializer(User.objects.get(username=j), many=False).data)
+                            if 'smart_entry' in data["secondary"]:
+                                secondary_actors.append('This block is created from IoT input')
+                            else:
+                                for j in data["secondary"]:
+                                    secondary_actors.append(
+                                        UserSerializer(User.objects.get(username=j), many=False).data)
                             result["secondary"] = secondary_actors
                             result["timestamp"] = i["timestamp"]
                             for k in data["document"]:
