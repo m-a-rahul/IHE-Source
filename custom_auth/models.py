@@ -6,7 +6,6 @@ from django.dispatch import receiver
 from django.template.loader import render_to_string
 from admin_honeypot.signals import honeypot
 
-User._meta.get_field('email')._unique = True
 User._meta.get_field('email').blank = False
 User._meta.get_field('email').null = False
 
