@@ -2,7 +2,6 @@ import json
 import cryptocode
 import math
 import random
-from decouple import config
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
@@ -15,6 +14,7 @@ from blockchain.blockchain import Blockchain
 from custom_auth.serializers import UserSerializer
 from user_details.serializers import PatientSerializer
 from user_details.models import HospitalStaff, BlockchainAccess, Patient, BlockchainAccessOtp
+from src.settings import BLOCK_CRYPTO_KEY
 
 blockchain = Blockchain()
 
@@ -153,7 +153,7 @@ class RetrieveRecords(APIView):
             chain = [json.loads(i) for i in blockchain.chain]
             response_list = []
             for i in chain[1:]:
-                data = json.loads(cryptocode.decrypt(i["data"], config('BLOCK_CRYPTO_KEY')))
+                data = json.loads(cryptocode.decrypt(i["data"], 'BLOCK_CRYPTO_KEY'))
                 if data["primary"] == primary:
 
                     # Retrieve Documents
@@ -335,7 +335,7 @@ class GetMyPatients(APIView):
             response_list = []
             patient_list = []
             for i in chain[1:]:
-                data = json.loads(cryptocode.decrypt(i["data"], config('BLOCK_CRYPTO_KEY')))
+                data = json.loads(cryptocode.decrypt(i["data"], 'BLOCK_CRYPTO_KEY'))
                 if request.user.username in data["secondary"]:
                     patient_list.append(data["primary"])
             # Remove duplicate collections

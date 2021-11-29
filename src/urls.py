@@ -2,10 +2,10 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from decouple import config
+from src.settings import ADMIN_URL
 
 urlpatterns = [
-    path(config('ADMIN_URL'), admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),
     path('auth/', include('custom_auth.urls')),
     path('blockchain/', include('blockchain.urls')),
     path('user-details/', include('user_details.urls')),

@@ -4,8 +4,7 @@ import json
 import requests
 import cryptocode
 from requests.exceptions import ConnectionError
-from decouple import config
-
+from src.settings import BLOCK_CRYPTO_KEY, BLOCK_NONCE, BLOCK_NODES
 
 class Block:
     """
@@ -20,7 +19,7 @@ class Block:
         self.version = 1
         self.nonce = nonce
         self.previous_hash = previous_hash
-        self.data = cryptocode.encrypt(json.dumps(data), config('BLOCK_CRYPTO_KEY'))
+        self.data = cryptocode.encrypt(json.dumps(data), BLOCK_CRYPTO_KEY)
 
     def jsonify(self):
         return json.dumps(self.__dict__)
@@ -30,7 +29,7 @@ class Blockchain:
 
     def __init__(self):
         self.chain = []
-        self.nodes = {"34.96.210.147:8000", "34.96.210.147:8001"}
+        self.nodes = BLOCK_NODES
         self.data = {}
         self.create_block(nonce=1, previous_hash='0', data={"primary": None,
                                                             "secondary": [],
@@ -64,7 +63,7 @@ class Blockchain:
         check = False
         while check is False:
             hash_operation = hashlib.sha256(str(nonce ** 2 - previous_nonce ** 2).encode()).hexdigest()
-            if hash_operation[:4] == config('BLOCK_NONCE'):
+            if hash_operation[:4] == BLOCK_NONCE:
                 check = True
             else:
                 nonce += 1
@@ -93,7 +92,7 @@ class Blockchain:
             previous_nonce = json.loads(head)['nonce']
             nonce = json.loads(block)['nonce']
             hash_operation = hashlib.sha256(str(nonce ** 2 - previous_nonce ** 2).encode()).hexdigest()
-            if hash_operation[:4] != config('BLOCK_NONCE'):
+            if hash_operation[:4] != BLOCK_NONCE:
                 return False
             head = block
             index += 1

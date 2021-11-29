@@ -1,10 +1,13 @@
+import os
 from pathlib import Path
-from decouple import config
+from dotenv import load_dotenv, find_dotenv
+
+load_dotenv(find_dotenv())
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = False
 
@@ -75,12 +78,12 @@ WSGI_APPLICATION = 'src.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': config('DATABASE_ENGINE'),
-        'NAME': config('DATABASE_NAME'),
-        'USER': config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST': config('DATABASE_HOST'),
-        'PORT': config('DATABASE_PORT'),
+        'ENGINE': os.environ['DATABASE_ENGINE'],
+        'NAME': os.environ['DATABASE_NAME'],
+        'USER': os.environ['DATABASE_USER'],
+        'PASSWORD': os.environ['DATABASE_PASSWORD'],
+        'HOST': os.environ['DATABASE_HOST'],
+        'PORT': os.environ['DATABASE_PORT']
     }
 }
 
@@ -122,8 +125,7 @@ if not DEBUG:
 
 
 CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'http://192.168.29.100:3000',
+    os.environ['FRONTEND_URL'],
 ]
 
 STATIC_URL = '/static/'
@@ -148,20 +150,32 @@ SITE_ID = 1
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
-EMAIL_BACKEND = config('EMAIL_BACKEND')
+EMAIL_BACKEND = os.environ['EMAIL_BACKEND']
 
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+EMAIL_USE_TLS = bool(os.environ['EMAIL_USE_TLS'])
 
-EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_HOST = os.environ['EMAIL_HOST']
 
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
+EMAIL_PORT = int(os.environ['EMAIL_PORT'])
 
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']
 
-EMAIL_HOST_USER = config('EMAIL_ID')
+EMAIL_HOST_USER = os.environ['EMAIL_ID']
 
-DEFAULT_FROM_EMAIL = config('EMAIL_ID')
+DEFAULT_FROM_EMAIL = os.environ['EMAIL_ID']
 
 SESSION_COOKIE_SECURE = True
 
 CSRF_COOKIE_SECURE = True
+
+FRONTEND_URL = os.environ['FRONTEND_URL']
+
+ADMIN_URL = os.environ['ADMIN_URL']
+
+BLOCK_CRYPTO_KEY = os.environ['BLOCK_CRYPTO_KEY']
+
+BLOCK_ACCESS_KEY = os.environ['BLOCK_ACCESS_KEY']
+
+BLOCK_NONCE = os.environ['BLOCK_NONCE']
+
+BLOCK_NODES = set(os.environ['BLOCK_NODES'].split(','))

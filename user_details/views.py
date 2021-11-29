@@ -7,11 +7,11 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from decouple import config
 from user_details.serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
 from custom_auth.serializers import UserSerializerWithoutToken, UserSerializer
 from user_details.models import Hospital, HospitalStaff, Patient
 from custom_auth.views import username_generator
+from src.settings import FRONTEND_URL
 
 
 def generate_random_password():
@@ -86,7 +86,7 @@ class CreateHospitalStaff(APIView):
                         'username': username,
                         'email': i['Email'],
                         'last_name': i['Name'],
-                        'frontend_url': config('FRONTEND_URL')
+                        'frontend_url': FRONTEND_URL
                     }
 
                     email_html_message = render_to_string('staffwelcomeemail/staff_welcome.html', context)

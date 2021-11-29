@@ -9,11 +9,10 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django_rest_passwordreset.signals import reset_password_token_created
-from decouple import config
 from custom_auth.serializers import UserSerializer, UserSerializerWithToken
 from user_details.models import Patient, HospitalStaff, Hospital
 from user_details.serializers import PatientSerializer, HospitalSerializer, HospitalStaffSerializer
-
+from src.settings import FRONTEND_URL
 
 def username_generator():
     uid_list = []
@@ -81,7 +80,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         'username': reset_password_token.user.username,
         'email': reset_password_token.user.email,
         'last_name': reset_password_token.user.last_name,
-        'reset_password_url': config('FRONTEND_URL') + "/reset_password/?auth_token={}".format(reset_password_token.key)
+        'reset_password_url': FRONTEND_URL + "/reset_password/?auth_token={}".format(reset_password_token.key)
     }
 
     email_html_message = render_to_string('passwordresetemail/user_reset_password.html', context)
