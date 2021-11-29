@@ -30,7 +30,7 @@ class Blockchain:
 
     def __init__(self):
         self.chain = []
-        self.nodes = {"127.0.0.1:8000", "127.0.0.1:8001"}
+        self.nodes = {"34.96.210.147:8000", "34.96.210.147:8001"}
         self.data = {}
         self.create_block(nonce=1, previous_hash='0', data={"primary": None,
                                                             "secondary": [],
