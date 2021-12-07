@@ -153,7 +153,7 @@ class RetrieveRecords(APIView):
             chain = [json.loads(i) for i in blockchain.chain]
             response_list = []
             for i in chain[1:]:
-                data = json.loads(cryptocode.decrypt(i["data"], 'BLOCK_CRYPTO_KEY'))
+                data = json.loads(cryptocode.decrypt(i["data"], BLOCK_CRYPTO_KEY))
                 if data["primary"] == primary:
 
                     # Retrieve Documents
@@ -335,7 +335,7 @@ class GetMyPatients(APIView):
             response_list = []
             patient_list = []
             for i in chain[1:]:
-                data = json.loads(cryptocode.decrypt(i["data"], 'BLOCK_CRYPTO_KEY'))
+                data = json.loads(cryptocode.decrypt(i["data"], BLOCK_CRYPTO_KEY))
                 if request.user.username in data["secondary"]:
                     patient_list.append(data["primary"])
             # Remove duplicate collections

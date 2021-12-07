@@ -11,7 +11,7 @@ SECRET_KEY = os.environ['SECRET_KEY']
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['http://34.96.210.147/']
+ALLOWED_HOSTS = ['127.0.0.1', os.environ['HOST_URL']]
 
 ADMINS = [('Rahul', 'antorahul070@gmail.com'),
           ('Pritish', 'princepritish26@gmail.com'),
@@ -130,9 +130,12 @@ CORS_ORIGIN_WHITELIST = [
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+if DEBUG:
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+    ]
+else:
+    STATIC_ROOT =  BASE_DIR/"static"
 
 LANGUAGE_CODE = 'en-us'
 
@@ -164,9 +167,11 @@ EMAIL_HOST_USER = os.environ['EMAIL_ID']
 
 DEFAULT_FROM_EMAIL = os.environ['EMAIL_ID']
 
-SESSION_COOKIE_SECURE = True
+#SECURE_SSL_REDIRECT = True
 
-CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
+
+#CSRF_COOKIE_SECURE = True
 
 FRONTEND_URL = os.environ['FRONTEND_URL']
 
