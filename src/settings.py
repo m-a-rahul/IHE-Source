@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = False
+DEBUG = bool(os.environ['DEBUG'])
 
 ALLOWED_HOSTS = ['127.0.0.1', os.environ['HOST_URL']]
 

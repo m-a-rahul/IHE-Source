@@ -1,5 +1,5 @@
 from django.urls import path
-from blockchain.views import GetChain, MineBlock, RetrieveRecords, GainAccess, GetMyPatients, CheckAccess, RequestAccess
+from blockchain.views import GetChain, MineBlock, RetrieveRecords, GainAccess, GetMyPatients, CheckAccess, RequestAccess, GetMyPatientsAnalytics
 
 app_name = 'blockchain'
 
@@ -11,4 +11,5 @@ urlpatterns = [
     path('gain_access/', GainAccess.as_view(), name="gain_access"),
     path('check_access/', CheckAccess.as_view(), name="check_access"),
     path('get_mypatients/', GetMyPatients.as_view(), name="get_my_patients"),
+    path('get_mypatients_analytics/', GetMyPatientsAnalytics.as_view(), name="get_my_patients_analytics"),
 ]

@@ -349,3 +349,44 @@ class GetMyPatients(APIView):
                 response_list.append(user_serializer)
             response = {'status': 'success', 'data': response_list}
         return Response(response)
+
+
+class GetMyPatientsAnalytics(APIView):
+    @staticmethod
+    def get(request):
+        # Only hospital staff are allowed
+        try:
+            request.user.hospital_staff
+        except HospitalStaff.DoesNotExist:
+            response = {'status': 'failure', 'message': 'Unauthorised'}
+            return Response(response)
+
+        blockchain.consensus()
+        response = {'status': 'failure', 'message': 'Invalid chain'}
+
+        if blockchain.check_validity(blockchain.chain):
+            chain = [json.loads(i) for i in blockchain.chain]
+            patient_list = []
+            for i in chain[1:]:
+                data = json.loads(cryptocode.decrypt(i["data"], BLOCK_CRYPTO_KEY))
+                if request.user.username in data["secondary"]:
+                    patient_list.append(data["primary"])
+            # Remove duplicate collections
+            patient_list = list(set(patient_list))
+
+            response_dict = {}
+            patient_list_normal = []
+            patient_list_high = []
+            for i in chain[1:][::-1]:
+                data = json.loads(cryptocode.decrypt(i["data"], BLOCK_CRYPTO_KEY))
+                if data["primary"] in patient_list and data["collection"] == "analytics":
+                    if data["primary"] not in patient_list_normal and data["primary"] not in patient_list_high:
+                        if data["document"][0].split('_')[2] == "Normal":
+                            patient_list_normal.append(data["primary"])
+                        else:
+                            patient_list_high.append(data["primary"])
+            response_dict["normal"] = len(patient_list_normal)
+            response_dict["high"] = len(patient_list_high)
+
+            response = {'status': 'success', 'data': response_dict}
+        return Response(response)
