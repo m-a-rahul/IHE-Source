@@ -126,6 +126,7 @@ if not DEBUG:
 
 CORS_ORIGIN_WHITELIST = [
     os.environ['FRONTEND_URL'],
+    os.environ['MODEL_URL'],
 ]
 
 STATIC_URL = '/static/'

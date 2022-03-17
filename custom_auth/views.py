@@ -58,6 +58,8 @@ class CurrentUser(APIView):
                 detail_serializer["user_type"] = "hospital"
             else:
                 detail_serializer = dict(HospitalStaffSerializer(request.user.hospital_staff, many=False).data)
+                hospital = HospitalStaff.objects.get(user=request.user).hos_code
+                detail_serializer["hospital"] = hospital.user.last_name
                 detail_serializer["user_details"] = "present"
                 detail_serializer["user_type"] = "hospital_staff"
             user_serializer.update(detail_serializer)
