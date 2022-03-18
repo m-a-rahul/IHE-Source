@@ -69,6 +69,8 @@ class MineBlock(APIView):
             nonce = blockchain.get_nonce(previous_nonce)
             previous_hash = blockchain.get_hash(previous_block)
             document = request.data["document"]
+            if request.data['collection'] == "analytics":
+                document = [request.data["document"]]
             data = {
                 'primary': request.data['primary'],
                 'secondary': secondary,
@@ -150,10 +152,7 @@ class RetrieveRecords(APIView):
 
                     # Retrieve Documents
                     if collection:
-                        if collection == "analytics":
-                            response = {'status': 'failure', 'message': 'Invalid request'}
-                            return Response(response)
-                        elif collection == data["collection"]:
+                        if collection == data["collection"]:
                             result = {}
                             secondary_actors = []
                             documents = []
@@ -174,8 +173,6 @@ class RetrieveRecords(APIView):
             # Remove duplicate collections and analytics
             if not collection:
                 response_list = list(set(response_list))
-                if "analytics" in response_list:
-                    response_list.remove("analytics")
             response = {'status': 'success', 'data': response_list}
         return Response(response)
 
