@@ -1,0 +1,8 @@
+{% autoescape off %}
+Review entry at http://127.0.0.1:8000{% url "admin:admin_honeypot_loginattempt_change" object.id %}
+
+Username: {{ object.username }}
+IP: {{ object.ip_address }}
+Timestamp: {{ object.timestamp }}
+
+{% endautoescape %}

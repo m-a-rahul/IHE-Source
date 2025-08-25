@@ -1,0 +1,8 @@
+{% autoescape off %}
+Hi {{ last_name }}
+Here is your otp requested by {{ hospital }}.
+
+OTP: {{ otp }}
+
+Do not share the otp if you did not authorise it.
+{% endautoescape %}
